@@ -10,5 +10,5 @@ app.get("/health", async (_req, reply) => reply.status(StatusCodes.OK).send())
 
 app.listen({
   port: Number(process.env.APP_PORT) || 3000,
-  host: process.env.APP_HOST || "localhost"
+  host: process.env.APP_HOST || "localhost",
 })

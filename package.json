@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/index.ts",
     "start": "tsc && node dist/index.js",
-    "lint": "eslint . ",
-    "format": "prettier --write ."
+    "migrate": "npx prisma migrate deploy",
+    "prisma:generate": "npx prisma generate",
+    "format": "prettier --write .",
+    "lint": "eslint . "
   },
   "keywords": [],
   "author": "",
@@ -14,6 +16,7 @@
   "description": "",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
+    "@prisma/client": "^6.6.0",
     "@types/node": "^22.14.0",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
@@ -24,6 +27,7 @@
     "fastify": "^5.3.0",
     "http-status-codes": "^2.3.0",
     "prettier": "^3.5.3",
+    "prisma": "^6.6.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",

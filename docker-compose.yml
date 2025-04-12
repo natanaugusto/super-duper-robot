@@ -7,14 +7,31 @@ services:
     ports:
       - "${APP_PORT:-3000}:${APP_PORT:-3000}"
     environment:
-      APP_HOST: '${APP_HOST:-0.0.0.0}'
+      APP_HOST: "${APP_HOST:-0.0.0.0}"
     networks:
       - pantest
     depends_on:
       - postgres
     volumes:
-      - '.:/var/app'
+      - ".:/var/app"
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: "${DB_DATABASE:-app}"
+      POSTGRES_USER: "${DB_USERNAME:-pguser}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-secret}"
+    ports:
+      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
+    networks:
+      - pantest
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
 networks:
   pantest:
-      driver: bridge
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
