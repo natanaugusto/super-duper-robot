@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        PORT: ${APP_PORT:-3000}
+    ports:
+      - "${APP_PORT:-3000}:${APP_PORT:-3000}"
+    environment:
+      APP_HOST: '${APP_HOST:-0.0.0.0}'
+    networks:
+      - pantest
+    depends_on:
+      - postgres
+    volumes:
+      - '.:/var/app'
+
+networks:
+  pantest:
+      driver: bridge
