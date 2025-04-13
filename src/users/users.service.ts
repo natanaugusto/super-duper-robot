@@ -14,7 +14,7 @@ const select = {
 export const createUser = (user: UserInput) =>
   db.user.create({
     data: user,
-    select
+    select,
   })
 
 export const getUsers = () => db.user.findMany({ select })
@@ -22,10 +22,13 @@ export const getUsers = () => db.user.findMany({ select })
 export const getUserById = (id: number) =>
   db.user.findUniqueOrThrow({ where: { id }, select })
 
+export const getUserByEmail = (email: string) =>
+  db.user.findUniqueOrThrow({ where: { email } })
+
 export const updateUser = (id: number, user: Partial<UserInput>) =>
   db.user.update({
     where: { id },
-    data: user
+    data: user,
   })
 
 export const deleteUser = (id: number) => db.user.delete({ where: { id } })

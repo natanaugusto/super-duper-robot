@@ -2,6 +2,7 @@ import { Role } from "@db"
 import {
   createUser,
   deleteUser,
+  getUserByEmail,
   getUserById,
   getUsers,
   updateUser,
@@ -64,7 +65,8 @@ describe("Users - Service", () => {
     const result = await createUser(user)
 
     expect(db.user.create).toHaveBeenCalledWith({
-      data: user, select
+      data: user,
+      select,
     })
     expect(result).toEqual(mockedUser)
   })
@@ -88,7 +90,21 @@ describe("Users - Service", () => {
     const result = await getUserById(userId)
 
     expect(db.user.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: userId }, select
+      where: { id: userId },
+      select,
+    })
+    expect(result).toEqual(mockedUser)
+  })
+
+  it("should get a user by email", async () => {
+    const db = jest.requireMock("@db").default
+    const userEmail = "john.doe@mail.com"
+    db.user.findUniqueOrThrow.mockResolvedValue(mockedUser)
+
+    const result = await getUserByEmail(userEmail)
+
+    expect(db.user.findUniqueOrThrow).toHaveBeenCalledWith({
+      where: { email: userEmail },
     })
     expect(result).toEqual(mockedUser)
   })

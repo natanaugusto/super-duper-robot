@@ -1,5 +1,5 @@
 import { hash } from "bcrypt"
-import { FastifyInstance, FastifyReply } from "fastify"
+import { FastifyInstance } from "fastify"
 import { StatusCodes } from "http-status-codes"
 import {
   createUser,
@@ -9,15 +9,17 @@ import {
   updateUser,
 } from "./users.service"
 import { partialUserSchema, userSchema } from "./user.schema"
-import { Prisma } from "@db"
-import { ZodError } from "zod"
+import { replyException } from "../utils/replyException"
 
 export default function usersRoute(app: FastifyInstance) {
   app.post("/users", async (req, reply) => {
     try {
       const userData = userSchema.parse(req.body)
 
-      const user = await createUser({ ...userData, password: await hash(userData.password, 10) })
+      const user = await createUser({
+        ...userData,
+        password: await hash(userData.password, 10),
+      })
 
       return reply.status(StatusCodes.CREATED).send(user)
     } catch (err) {
@@ -75,28 +77,4 @@ export default function usersRoute(app: FastifyInstance) {
       return replyException(err, reply)
     }
   })
-}
-
-function replyException(err: unknown, reply: FastifyReply): FastifyReply {
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    switch (err.code) {
-      case "P2025":
-        return reply.status(StatusCodes.NOT_FOUND).send(err.meta)
-      case "P2002":
-        return reply.status(StatusCodes.UNPROCESSABLE_ENTITY).send(err.meta)
-    }
-  }
-
-  if (err instanceof ZodError) {
-    return reply
-      .status(StatusCodes.UNPROCESSABLE_ENTITY)
-      .send(
-        err.errors.map((issue) => ({
-          message: issue.message,
-          path: issue.path,
-        })),
-      )
-  }
-
-  return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err)
 }
