@@ -9,6 +9,7 @@ import {
 } from "./users.model"
 import { partialUserSchema, userSchema } from "./user.schema"
 import { Prisma } from "@db"
+import { ZodError } from "zod"
 
 export default function usersRoute(app: FastifyInstance) {
   app.post("/users", async (req, reply) => {
@@ -80,7 +81,21 @@ function replyException(err: unknown, reply: FastifyReply): FastifyReply {
     switch (err.code) {
       case "P2025":
         return reply.status(StatusCodes.NOT_FOUND).send(err.meta)
+      case "P2002":
+        return reply.status(StatusCodes.UNPROCESSABLE_ENTITY).send(err.meta)
     }
   }
+
+  if (err instanceof ZodError) {
+    return reply
+      .status(StatusCodes.UNPROCESSABLE_ENTITY)
+      .send(
+        err.errors.map((issue) => ({
+          message: issue.message,
+          path: issue.path,
+        })),
+      )
+  }
+
   return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err)
 }
