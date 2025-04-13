@@ -7,7 +7,7 @@ import {
   getUserById,
   getUsers,
   updateUser,
-} from "./users.model"
+} from "./users.service"
 import { partialUserSchema, userSchema } from "./user.schema"
 import { Prisma } from "@db"
 import { ZodError } from "zod"

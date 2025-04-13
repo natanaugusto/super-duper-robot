@@ -5,7 +5,7 @@ import {
   getUserById,
   getUsers,
   updateUser,
-} from "./users.model"
+} from "./users.service"
 
 jest.mock("@db", () => {
   const mockPrisma = {
@@ -29,7 +29,7 @@ jest.mock("@db", () => {
   }
 })
 
-describe("Users - Model", () => {
+describe("Users - Service", () => {
   const user = {
     name: "John Doe",
     email: "john.doe@mail.com",
