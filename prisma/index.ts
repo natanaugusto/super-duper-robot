@@ -1,5 +1,5 @@
 import { PrismaClient } from "./client"
 
-export const db = new PrismaClient()
+export default new PrismaClient()
 
-export { Role, User } from "./client"
+export { PrismaClient, Role, type User } from "./client"

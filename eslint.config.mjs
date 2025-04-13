@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint"
 export default [
   { files: ["**/*.{mjs,cjs,ts}"] },
   { languageOptions: { globals: globals.browser } },
-  { ignores: ["dist/*", "prisma/client"] },
+  { ignores: ["dist/", "prisma/client", "coverage/"] },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
 ]
