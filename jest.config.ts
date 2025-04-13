@@ -11,7 +11,7 @@ const config: Config = {
   clearMocks: false,
   collectCoverage: true,
   coverageDirectory: "coverage",
-  coveragePathIgnorePatterns: ["/node_modules/"],
+  coveragePathIgnorePatterns: ["/node_modules/", "/prisma"],
   testMatch: ["<rootDir>/src/**/*.test.ts"],
   coverageProvider: "v8",
   transform: {

@@ -1,24 +1,25 @@
-import { FastifyInstance } from "fastify"
+import { FastifyInstance, FastifyReply } from "fastify"
 import { StatusCodes } from "http-status-codes"
 import {
-  type UserInput,
   createUser,
   deleteUser,
   getUserById,
   getUsers,
   updateUser,
-} from "./users.service"
+} from "./users.model"
+import { partialUserSchema, userSchema } from "./user.schema"
+import { Prisma } from "@db"
 
 export default function usersRoute(app: FastifyInstance) {
   app.post("/users", async (req, reply) => {
     try {
-      const userData = req.body as UserInput
+      const userData = userSchema.parse(req.body)
 
       const user = await createUser(userData)
 
       return reply.status(StatusCodes.CREATED).send(user)
     } catch (err) {
-      return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err)
+      return replyException(err, reply)
     }
   })
 
@@ -28,7 +29,7 @@ export default function usersRoute(app: FastifyInstance) {
 
       return reply.status(StatusCodes.OK).send(users)
     } catch (err) {
-      return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err)
+      return replyException(err, reply)
     }
   })
 
@@ -40,7 +41,7 @@ export default function usersRoute(app: FastifyInstance) {
 
       return reply.status(StatusCodes.OK).send(user)
     } catch (err) {
-      return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err)
+      return replyException(err, reply)
     }
   })
 
@@ -48,13 +49,13 @@ export default function usersRoute(app: FastifyInstance) {
     try {
       const { id } = req.params as { id: number }
 
-      const userData = req.body as UserInput
+      const userData = partialUserSchema.parse(req.body)
       await updateUser(Number(id), userData)
 
       const user = await getUserById(Number(id))
       return reply.status(StatusCodes.CREATED).send(user)
     } catch (err) {
-      return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err)
+      return replyException(err, reply)
     }
   })
 
@@ -69,7 +70,17 @@ export default function usersRoute(app: FastifyInstance) {
 
       return reply.status(StatusCodes.NOT_FOUND).send()
     } catch (err) {
-      return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err)
+      return replyException(err, reply)
     }
   })
+}
+
+function replyException(err: unknown, reply: FastifyReply): FastifyReply {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (err.code) {
+      case "P2025":
+        return reply.status(StatusCodes.NOT_FOUND).send(err.meta)
+    }
+  }
+  return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err)
 }
