@@ -16,6 +16,6 @@
       "@db": ["./prisma"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "prisma/**/*"],
   "exclude": ["dist", "node_modules"]
 }
