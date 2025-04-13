@@ -1,10 +1,13 @@
+import z from "zod"
+import * as bcrypt from "bcrypt"
 import Fastify, { FastifyInstance } from "fastify"
 import { StatusCodes, getReasonPhrase } from "http-status-codes"
+import { Prisma } from "@db"
 import usersRoute from "./users.route"
 import * as userModel from "./users.model"
-import { Prisma } from "@db"
-import z from "zod"
 
+
+jest.mock("bcrypt")
 jest.mock("./users.model", () => ({
   createUser: jest.fn(),
   getUsers: jest.fn(),
@@ -25,7 +28,9 @@ describe("Users - Route", () => {
 
   const mockUser = {
     id: 1,
-    ...mockUserInput,
+    name: mockUserInput.name,
+    email: mockUserInput.email,
+    role: mockUserInput.role,
     createdAt: new Date().toDateString(),
     updatedAt: new Date().toDateString(),
   }
@@ -33,6 +38,7 @@ describe("Users - Route", () => {
   beforeEach(async () => {
     app = Fastify()
     app.register(usersRoute)
+    jest.spyOn(bcrypt, "hash").mockImplementation(async (data, rounds) => `${data}:${rounds}`)
     jest.clearAllMocks()
   })
 
@@ -42,7 +48,7 @@ describe("Users - Route", () => {
 
   describe("CREATE - POST", () => {
     it("should create an user", async () => {
-      ;(userModel.createUser as jest.Mock).mockResolvedValue(mockUser)
+      ; (userModel.createUser as jest.Mock).mockResolvedValue(mockUser)
 
       const response = await app.inject({
         method: "POST",
@@ -52,7 +58,7 @@ describe("Users - Route", () => {
 
       expect(response.statusCode).toBe(StatusCodes.CREATED)
       expect(response.json()).toEqual(mockUser)
-      expect(userModel.createUser).toHaveBeenCalledWith(mockUserInput)
+      expect(userModel.createUser).toHaveBeenCalledWith({ ...mockUserInput, password: `${mockUserInput.password}:10` })
     })
 
     it("should receive an error user creation", async () => {
@@ -64,7 +70,7 @@ describe("Users - Route", () => {
         },
         clientVersion: "1",
       })
-      ;(userModel.createUser as jest.Mock).mockRejectedValue(error)
+        ; (userModel.createUser as jest.Mock).mockRejectedValue(error)
 
       const response = await app.inject({
         method: "POST",
@@ -80,7 +86,7 @@ describe("Users - Route", () => {
   describe("READ - GET", () => {
     it("should get all users", async () => {
       const mockUsers = [mockUser, { ...mockUser, id: 2, name: "Jane Doe" }]
-      ;(userModel.getUsers as jest.Mock).mockResolvedValue(mockUsers)
+        ; (userModel.getUsers as jest.Mock).mockResolvedValue(mockUsers)
 
       const response = await app.inject({
         method: "GET",
@@ -94,7 +100,7 @@ describe("Users - Route", () => {
 
     it("should get a user by ID", async () => {
       const userId = 1
-      ;(userModel.getUserById as jest.Mock).mockResolvedValue(mockUser)
+        ; (userModel.getUserById as jest.Mock).mockResolvedValue(mockUser)
 
       const response = await app.inject({
         method: "GET",
@@ -108,7 +114,7 @@ describe("Users - Route", () => {
 
     it("should receive an error on get all users", async () => {
       const error = new Error("Internal Error")
-      ;(userModel.getUsers as jest.Mock).mockRejectedValue(error)
+        ; (userModel.getUsers as jest.Mock).mockRejectedValue(error)
 
       const response = await app.inject({
         method: "GET",
@@ -132,7 +138,7 @@ describe("Users - Route", () => {
         },
         clientVersion: "1",
       })
-      ;(userModel.getUserById as jest.Mock).mockRejectedValue(error)
+        ; (userModel.getUserById as jest.Mock).mockRejectedValue(error)
 
       const response = await app.inject({
         method: "GET",
@@ -149,8 +155,8 @@ describe("Users - Route", () => {
       const userId = 1
       const updateData = { name: "John Updated" }
       const updatedUser = { ...mockUser, name: "John Updated" }
-      ;(userModel.updateUser as jest.Mock).mockResolvedValue(undefined)
-      ;(userModel.getUserById as jest.Mock).mockResolvedValue(updatedUser)
+        ; (userModel.updateUser as jest.Mock).mockResolvedValue(undefined)
+        ; (userModel.getUserById as jest.Mock).mockResolvedValue(updatedUser)
 
       const response = await app.inject({
         method: "PUT",
@@ -178,7 +184,7 @@ describe("Users - Route", () => {
           path: ["name"],
         },
       ])
-      ;(userModel.updateUser as jest.Mock).mockRejectedValue(error)
+        ; (userModel.updateUser as jest.Mock).mockRejectedValue(error)
 
       const response = await app.inject({
         method: "PUT",
@@ -199,7 +205,7 @@ describe("Users - Route", () => {
   describe("DELETE - DELETE", () => {
     it("should delete an user", async () => {
       const userId = 1
-      ;(userModel.deleteUser as jest.Mock).mockResolvedValue(mockUser)
+        ; (userModel.deleteUser as jest.Mock).mockResolvedValue(mockUser)
 
       const response = await app.inject({
         method: "DELETE",
@@ -213,7 +219,7 @@ describe("Users - Route", () => {
 
     it("should receive user not found", async () => {
       const userId = 999
-      ;(userModel.deleteUser as jest.Mock).mockResolvedValue(null)
+        ; (userModel.deleteUser as jest.Mock).mockResolvedValue(null)
 
       const response = await app.inject({
         method: "DELETE",
@@ -226,7 +232,7 @@ describe("Users - Route", () => {
     it("should receive a an error on user delete", async () => {
       const userId = 999
       const error = new Error("Error on delete")
-      ;(userModel.deleteUser as jest.Mock).mockRejectedValue(error)
+        ; (userModel.deleteUser as jest.Mock).mockRejectedValue(error)
 
       const response = await app.inject({
         method: "DELETE",

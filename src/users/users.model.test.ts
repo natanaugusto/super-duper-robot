@@ -44,6 +44,15 @@ describe("Users - Model", () => {
     updatedAt: new Date(),
   }
 
+  const select = {
+    id: true,
+    name: true,
+    email: true,
+    createdAt: true,
+    updatedAt: true,
+    role: true,
+  }
+
   beforeEach(() => {
     jest.clearAllMocks()
   })
@@ -54,7 +63,9 @@ describe("Users - Model", () => {
 
     const result = await createUser(user)
 
-    expect(db.user.create).toHaveBeenCalledWith({ data: user })
+    expect(db.user.create).toHaveBeenCalledWith({
+      data: user, select
+    })
     expect(result).toEqual(mockedUser)
   })
 
@@ -77,7 +88,7 @@ describe("Users - Model", () => {
     const result = await getUserById(userId)
 
     expect(db.user.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: userId },
+      where: { id: userId }, select
     })
     expect(result).toEqual(mockedUser)
   })

@@ -1,3 +1,4 @@
+import { hash } from "bcrypt"
 import { FastifyInstance, FastifyReply } from "fastify"
 import { StatusCodes } from "http-status-codes"
 import {
@@ -16,7 +17,7 @@ export default function usersRoute(app: FastifyInstance) {
     try {
       const userData = userSchema.parse(req.body)
 
-      const user = await createUser(userData)
+      const user = await createUser({ ...userData, password: await hash(userData.password, 10) })
 
       return reply.status(StatusCodes.CREATED).send(user)
     } catch (err) {
