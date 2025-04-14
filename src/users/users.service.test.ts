@@ -1,4 +1,4 @@
-import { Role } from "@db"
+import { Role } from "../../prisma"
 import {
   createUser,
   deleteUser,
@@ -8,7 +8,7 @@ import {
   updateUser,
 } from "./users.service"
 
-jest.mock("@db", () => {
+jest.mock("../../prisma", () => {
   const mockPrisma = {
     user: {
       create: jest.fn(),
@@ -59,7 +59,7 @@ describe("Users - Service", () => {
   })
 
   it("should create an user", async () => {
-    const db = jest.requireMock("@db").default
+    const db = jest.requireMock("../../prisma").default
     db.user.create.mockResolvedValue(mockedUser)
 
     const result = await createUser(user)
@@ -72,7 +72,7 @@ describe("Users - Service", () => {
   })
 
   it("should get all users", async () => {
-    const db = jest.requireMock("@db").default
+    const db = jest.requireMock("../../prisma").default
     const mockUsers = [mockedUser, { ...mockedUser, id: 2, name: "Jane Doe" }]
     db.user.findMany.mockResolvedValue(mockUsers)
 
@@ -83,7 +83,7 @@ describe("Users - Service", () => {
   })
 
   it("should get a user by ID", async () => {
-    const db = jest.requireMock("@db").default
+    const db = jest.requireMock("../../prisma").default
     const userId = 1
     db.user.findUniqueOrThrow.mockResolvedValue(mockedUser)
 
@@ -97,7 +97,7 @@ describe("Users - Service", () => {
   })
 
   it("should get a user by email", async () => {
-    const db = jest.requireMock("@db").default
+    const db = jest.requireMock("../../prisma").default
     const userEmail = "john.doe@mail.com"
     db.user.findUniqueOrThrow.mockResolvedValue(mockedUser)
 
@@ -110,7 +110,7 @@ describe("Users - Service", () => {
   })
 
   it("should update a user", async () => {
-    const db = jest.requireMock("@db").default
+    const db = jest.requireMock("../../prisma").default
     const userId = 1
     const updateData = { name: "John Updated" }
     const updatedUser = { ...mockedUser, name: "John Updated" }
@@ -126,7 +126,7 @@ describe("Users - Service", () => {
   })
 
   it("should delete a user", async () => {
-    const db = jest.requireMock("@db").default
+    const db = jest.requireMock("../../prisma").default
     const userId = 1
     db.user.delete.mockResolvedValue(mockedUser)
 

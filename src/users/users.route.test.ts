@@ -2,7 +2,7 @@ import z from "zod"
 import * as bcrypt from "bcrypt"
 import Fastify, { FastifyInstance } from "fastify"
 import { StatusCodes, getReasonPhrase } from "http-status-codes"
-import { Prisma } from "@db"
+import { Prisma } from "../../prisma"
 import usersRoute from "./users.route"
 import * as userService from "./users.service"
 

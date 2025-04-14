@@ -18,9 +18,6 @@ const config: Config = {
     "^.+\\.ts$": "ts-jest",
   },
   moduleFileExtensions: ["ts", "js", "json", "node"],
-  moduleNameMapper: {
-    "@db": "<rootDir>/prisma/index.ts",
-  },
 }
 
 export default config

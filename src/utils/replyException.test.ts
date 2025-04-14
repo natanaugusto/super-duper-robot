@@ -1,7 +1,7 @@
-import { Prisma } from "@db"
 import { ZodError } from "zod"
 import { FastifyReply } from "fastify"
 import { StatusCodes } from "http-status-codes"
+import { Prisma } from "../../prisma"
 import { replyException } from "./replyException"
 
 const mockReply = {
