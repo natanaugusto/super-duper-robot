@@ -11,6 +11,15 @@ import {
 import { partialUserSchema, userSchema } from "./user.schema"
 import { replyException } from "../utils/replyException"
 import { auth } from "../auth/auth.middleware"
+import { User } from "../../prisma"
+
+type Column = keyof Omit<User, "password">
+type Direction = "asc" | "desc"
+type OrderBy = { [key in Column]?: Direction }
+type Query = {
+  search?: string
+  order?: string
+}
 
 export default function usersRoute(app: FastifyInstance) {
   app.post("/users", async (req, reply) => {
@@ -28,9 +37,40 @@ export default function usersRoute(app: FastifyInstance) {
     }
   })
 
-  app.get("/users", { preHandler: auth }, async (_req, reply) => {
+  app.get("/users", { preHandler: auth }, async (req, reply) => {
     try {
-      const users = await getUsers()
+      const query = req.query as Query
+      let where = {}
+      let orderBy: OrderBy = {}
+
+      if (query?.search && query.search.length > 3) {
+        where = {
+          ...where,
+          OR: [
+            {
+              name: {
+                contains: query.search.toLowerCase(),
+              },
+            },
+            {
+              email: {
+                contains: query.search.toLowerCase(),
+              },
+            },
+          ],
+        }
+      }
+
+      if (query?.order && typeof query.order === "string") {
+        if (query.order.indexOf(":") > -1) {
+          const [column, direction] = query.order.split(":")
+          orderBy[column as Column] = direction as Direction
+        } else {
+          orderBy[query.order as Column] = "asc"
+        }
+      }
+
+      const users = await getUsers({ where, orderBy })
 
       return reply.status(StatusCodes.OK).send(users)
     } catch (err) {

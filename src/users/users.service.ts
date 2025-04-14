@@ -17,7 +17,8 @@ export const createUser = (user: UserInput) =>
     select,
   })
 
-export const getUsers = () => db.user.findMany({ select })
+export const getUsers = (params: { where?: {}; orderBy?: {} } = {}) =>
+  db.user.findMany({ select, ...params })
 
 export const getUserById = (id: number) =>
   db.user.findUniqueOrThrow({ where: { id }, select })

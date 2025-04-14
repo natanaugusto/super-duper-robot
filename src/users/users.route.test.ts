@@ -110,6 +110,64 @@ describe("Users - Route", () => {
       expect(userService.getUsers).toHaveBeenCalled()
     })
 
+    it("should search users by first name and order by id asc", async () => {
+      const mockUsers = [{ ...mockUser, id: 2, name: "Jane Doe" }]
+      ;(userService.getUsers as jest.Mock).mockResolvedValue(mockUsers)
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/users",
+        query: {
+          search: "Jane",
+          order: "id",
+        },
+      })
+
+      expect(response.statusCode).toBe(StatusCodes.OK)
+      expect(response.json()).toEqual(mockUsers)
+      expect(userService.getUsers).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: "jane",
+              },
+            },
+            {
+              email: {
+                contains: "jane",
+              },
+            },
+          ],
+        },
+        orderBy: {
+          id: "asc",
+        },
+      })
+    })
+
+    it("should get users ordered by name desc", async () => {
+      const mockUsers = [{ ...mockUser, id: 2, name: "Jane Doe" }]
+      ;(userService.getUsers as jest.Mock).mockResolvedValue(mockUsers)
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/users",
+        query: {
+          order: "name:desc",
+        },
+      })
+
+      expect(response.statusCode).toBe(StatusCodes.OK)
+      expect(response.json()).toEqual(mockUsers)
+      expect(userService.getUsers).toHaveBeenCalledWith({
+        where: {},
+        orderBy: {
+          name: "desc",
+        },
+      })
+    })
+
     it("should get a user by ID", async () => {
       const userId = 1
       ;(userService.getUserById as jest.Mock).mockResolvedValue(mockUser)
