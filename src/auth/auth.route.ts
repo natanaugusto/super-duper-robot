@@ -4,6 +4,8 @@ import { authSchema } from "./auth.schema"
 import { getUserByEmail } from "../users/users.service"
 import { StatusCodes } from "http-status-codes"
 import { replyException } from "../utils/replyException"
+import { auth } from "./auth.middleware"
+import { User } from "../../prisma"
 
 export default async function authRoute(app: FastifyInstance) {
   app.post("/login", async (req, reply) => {
@@ -24,6 +26,19 @@ export default async function authRoute(app: FastifyInstance) {
       const token = app.jwt.sign(user)
 
       return reply.status(StatusCodes.OK).send({ ...user, token })
+    } catch (err) {
+      return replyException(err, reply)
+    }
+  })
+
+  app.get("/logged", { preHandler: auth }, async (req, reply) => {
+    try {
+      const user = req.user as User
+      if (typeof user !== "object") {
+        throw new Error("The user is not logged"!)
+      }
+
+      return reply.status(StatusCodes.OK).send(user)
     } catch (err) {
       return replyException(err, reply)
     }
