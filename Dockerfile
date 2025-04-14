@@ -4,10 +4,14 @@ ARG PORT=3000
 
 WORKDIR /var/app
 
+RUN apk add --no-cache bash
+
 COPY . .
 
-RUN npm install --verbose
+COPY entrypoint.sh .
+
+RUN chmod +x entrypoint.sh
 
 EXPOSE ${PORT}
 
-CMD ["npm", "start"]
+ENTRYPOINT [ "./entrypoint.sh" ]

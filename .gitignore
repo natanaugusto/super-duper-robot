@@ -1,4 +1,6 @@
 node_modules/
 coverage/
 dist/
+prisma/client
+migration_lock.toml
 .env
