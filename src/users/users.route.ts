@@ -10,6 +10,7 @@ import {
 } from "./users.service"
 import { partialUserSchema, userSchema } from "./user.schema"
 import { replyException } from "../utils/replyException"
+import { auth } from "../auth/auth.middleware"
 
 export default function usersRoute(app: FastifyInstance) {
   app.post("/users", async (req, reply) => {
@@ -27,7 +28,7 @@ export default function usersRoute(app: FastifyInstance) {
     }
   })
 
-  app.get("/users", async (_req, reply) => {
+  app.get("/users", { preHandler: auth }, async (_req, reply) => {
     try {
       const users = await getUsers()
 
@@ -37,7 +38,7 @@ export default function usersRoute(app: FastifyInstance) {
     }
   })
 
-  app.get("/users/:id", async (req, reply) => {
+  app.get("/users/:id", { preHandler: auth }, async (req, reply) => {
     try {
       const { id } = req.params as { id: number }
 
@@ -49,7 +50,7 @@ export default function usersRoute(app: FastifyInstance) {
     }
   })
 
-  app.put("/users/:id", async (req, reply) => {
+  app.put("/users/:id", { preHandler: auth }, async (req, reply) => {
     try {
       const { id } = req.params as { id: number }
 
@@ -63,7 +64,7 @@ export default function usersRoute(app: FastifyInstance) {
     }
   })
 
-  app.delete("/users/:id", async (req, reply) => {
+  app.delete("/users/:id", { preHandler: auth }, async (req, reply) => {
     try {
       const { id } = req.params as { id: number }
 

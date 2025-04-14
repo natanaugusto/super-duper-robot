@@ -1,10 +1,11 @@
 import z from "zod"
 import * as bcrypt from "bcrypt"
-import Fastify, { FastifyInstance } from "fastify"
+import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { StatusCodes, getReasonPhrase } from "http-status-codes"
 import { Prisma } from "../../prisma"
 import usersRoute from "./users.route"
 import * as userService from "./users.service"
+import * as authMiddleware from "../auth/auth.middleware"
 
 jest.mock("bcrypt")
 jest.mock("./users.service", () => ({
@@ -40,6 +41,13 @@ describe("Users - Route", () => {
     jest
       .spyOn(bcrypt, "hash")
       .mockImplementation(async (data, rounds) => `${data}:${rounds}`)
+    jest
+      .spyOn(authMiddleware, "auth")
+      .mockImplementationOnce(
+        async (req: FastifyRequest, _reply: FastifyReply) => {
+          req.user = mockUser
+        },
+      )
     jest.clearAllMocks()
   })
 
